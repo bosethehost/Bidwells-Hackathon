@@ -538,14 +538,7 @@ def main():
                     else:
                         report += f"{h['title']} is a noted risk that should be assessed and mitigated with appropriate supporting documentation. "
         
-            # --- Strategic synthesis paragraph ---
-            report += (
-                "Strategically, the development approach should prioritize mitigating the most significant risks while leveraging policy-aligned benefits. "
-                "Phased delivery or alternative design solutions should be considered for high-risk elements, while moderate risks should be monitored and mitigated through targeted interventions. "
-                "Early engagement with the local planning authority and relevant stakeholders is strongly recommended to validate assumptions, address concerns, and refine mitigation strategies. "
-                "All risks and benefits, along with their policy justifications and mitigation measures, should be clearly documented in a comprehensive planning statement to maximize the likelihood of a successful application."
-            )
-        
+            # --- Strategic synthesis paragraph --- 
             st.markdown(report)
         
         else:
@@ -553,6 +546,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
