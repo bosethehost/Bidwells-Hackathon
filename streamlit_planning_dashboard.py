@@ -355,7 +355,7 @@ def main():
         site_choice = st.selectbox("Scenario Name", ["Elephant and Cast"])  # only option as requested
         primary_use = st.selectbox("Primary Purpose", ["Residential", "Commercial", "Mixed"])
         dwellings = st.number_input("Number of Dwellings", min_value=0, value=int(st.session_state.site_meta.get("dwellings",120)))
-        total_floorspace = st.number_input("Total Floorspace (m²)", min_value=0, value=float(st.session_state.site_meta.get("total_floorspace",5000)))
+        total_floorspace = st.number_input("Total Floorspace (m²)", min_value=0, value=int(st.session_state.site_meta.get("total_floorspace",5000)))
         percent_residential = 100
         if primary_use == "Mixed":
             percent_residential = st.slider("% Residential (Mixed)", 0, 100, 50)
@@ -473,5 +473,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
