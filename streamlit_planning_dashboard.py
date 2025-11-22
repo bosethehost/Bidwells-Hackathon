@@ -466,86 +466,111 @@ def main():
                             st.write(f"*Mitigation: {harm['mitigation']}*")
             
             # Recommendations
-            st.subheader("🎯 Recommendations")
+            st.subheader("🎯 Top 2 Risk Mitigation Recommendations (Scenario-Specific)")
 
-        if st.session_state.current_assessment:
-        
-            harms = st.session_state.current_assessment["balance"]["rationale"]["top_harms"]
-            benefits = st.session_state.current_assessment["balance"]["rationale"]["top_benefits"]
-            policy_weights = st.session_state.policy_weights
-        
-            report = ""
-        
-            # --- Benefits narrative ---
-            if benefits:
-                report += "The proposed development offers several significant benefits that should be emphasized in the planning submission. "
-                for b in benefits:
-                    if "housing" in b['title'].lower():
-                        report += (
-                            "Given the shortfall in housing delivery in the local area, this scheme can make an important contribution to meeting local housing needs. "
-                            "It is essential to clearly demonstrate how the proposal will deliver both market and affordable housing, with evidence of realistic delivery timelines and mechanisms. "
-                            "Policy-aligned benefits should be highlighted in the planning statement to support any tilted-balance considerations under national policy frameworks. "
-                        )
-                    elif "brownfield" in b['title'].lower():
-                        report += (
-                            "The redevelopment of previously developed land provides clear environmental and sustainability benefits. "
-                            "Brownfield regeneration reduces pressure on greenfield or green belt sites and aligns strongly with national and local planning policies promoting efficient land use. "
-                            "A clear statement of the environmental improvements, remediation works, and wider community benefits should be incorporated into the submission. "
-                        )
-                    elif "heritage" in b['title'].lower():
-                        report += (
-                            "The scheme has the opportunity to enhance the setting of adjacent heritage assets through sensitive design. "
-                            "Design statements should highlight how the development complements the historic environment while providing modern amenities, with careful consideration of materials, massing, and landscaping. "
-                        )
-                    else:
-                        report += f"{b['title']} is a positive aspect of the scheme and should be clearly documented in the planning narrative. "
-        
-            # --- Harms narrative with detailed planning guidance ---
-            if harms:
-                report += "Several risks have been identified that require careful mitigation and justification. "
-                for h in harms:
-                    impact = h.get("impact", 0)
-        
-                    if "flood" in h['title'].lower():
-                        report += (
-                            "Given the significant flood risk identified, the first priority must be to commission a site-specific Flood Risk Assessment (FRA) in line with national planning policy. "
-                            "The FRA should demonstrate not only how the development will remain safe over its lifetime but also that it will not increase flood risk elsewhere. "
-                            "It should incorporate climate change allowances, and early engagement with the Environment Agency and Lead Local Flood Authorities is strongly recommended to ensure that the proposed mitigation strategy is robust and acceptable. "
-                        )
-                    elif "heritage" in h['title'].lower():
-                        report += (
-                            "On the heritage impact front, the proximity to a listed building or conservation area necessitates a detailed heritage statement. "
-                            "This should assess the significance of any impacted asset, the contribution of the site to its setting, and propose design-led mitigation such as careful massing, landscaping, or choice of materials to reduce visual or experiential harm. "
-                            "Including this as part of a broader planning / design and access statement will justify how the scheme responds to policy while preserving historic character. "
-                        )
-                    elif "green belt" in h['title'].lower():
-                        report += (
-                            "As the site lies within or adjacent to the Green Belt, any development will need to demonstrate very special circumstances (VSC) to justify any inappropriate development. "
-                            "The planning submission should include a detailed Green Belt statement outlining the harm to openness and permanence, alongside quantified benefits such as housing delivery, brownfield regeneration, and community enhancements. "
-                            "The VSC argument must show that public benefits clearly outweigh any harm to the Green Belt. "
-                        )
-                    elif "contamination" in h['title'].lower():
-                        report += (
-                            "Where contamination risks are present, commissioning thorough ground investigations and remediation strategies is essential. "
-                            "The planning submission should include details of the remediation approach, monitoring plans, and verification processes to assure the local authority of the site's safety and environmental compliance. "
-                        )
-                    elif "access" in h['title'].lower():
-                        report += (
-                            "Constraints on access or highways require a robust Transport Assessment. "
-                            "The assessment should identify junction improvements, trip generation, and pedestrian/cyclist connectivity. "
-                            "Mitigation measures must be clearly defined and supported by technical evidence to ensure compliance with local and national highway standards. "
-                        )
-                    else:
-                        report += f"{h['title']} is a noted risk that should be assessed and mitigated with appropriate supporting documentation. "
-        
-            # --- Strategic synthesis paragraph --- 
-            st.markdown(report)
-        
-        else:
-            st.info("Run an assessment first to generate recommendations.")
+            if st.session_state.current_assessment:
+            
+                site = st.session_state.site_meta
+                harms = st.session_state.current_assessment["balance"]["rationale"]["top_harms"]
+                policy_weights = st.session_state.policy_weights
+                if not harms:
+                    st.info("No significant harms identified for this site.")
+                else:
+                    # Top 2 harms
+                    top_harms = sorted(harms, key=lambda x: x.get("impact", 0), reverse=True)[:2]
+            
+                    report = ""
+                    for h in top_harms:
+                        title = h.get("title", "Unknown Risk")
+                        desc = h.get("desc", "")
+            
+                        # ----- FLOOD RISK -----
+                        if "flood" in title.lower():
+                            report += (
+                                f"**{title}:** {desc}\n\n"
+                                "Given the flood risk, a site-specific Flood Risk Assessment (FRA) is essential. "
+                                "The FRA should demonstrate the development will remain safe throughout its lifecycle and avoid increasing flood risk elsewhere. "
+                            )
+                            if site.get("five_year_supply") in ["❌ No - Not demonstrated", "⚠️ Marginal"]:
+                                report += (
+                                    "Since the area has a housing supply shortfall, it is important to emphasize in the FRA and planning statement that mitigation measures allow safe housing delivery on this site. "
+                                )
+                            if site.get("brownfield"):
+                                report += (
+                                    "The FRA should also highlight that brownfield redevelopment is being achieved without exacerbating flood risk, strengthening the planning justification. "
+                                )
+                            report += (
+                                "Mitigation measures may include raising finished floor levels, sustainable drainage (SuDS), and safe pedestrian/vehicular routes, all documented for submission. \n\n"
+                            )
+            
+                        # ----- HERITAGE IMPACT -----
+                        elif "heritage" in title.lower():
+                            report += (
+                                f"**{title}:** {desc}\n\n"
+                                "A detailed Heritage Statement is required, assessing the significance of impacted assets and their setting. "
+                                "Mitigation can include sensitive massing, landscaping, and appropriate material choices. "
+                            )
+                            if policy_weights.get("heritage", 1.0) > 1.2:
+                                report += (
+                                    "High heritage sensitivity in local policy requires extra care; reference design-led solutions and any benefits from brownfield redevelopment or housing delivery to strengthen justification. "
+                                )
+                            report += "Include this in the planning/design and access statement to demonstrate policy compliance and minimize harm.\n\n"
+            
+                        # ----- GREEN BELT -----
+                        elif "green belt" in title.lower():
+                            report += (
+                                f"**{title}:** {desc}\n\n"
+                                "Development in the Green Belt requires demonstrating Very Special Circumstances (VSC). "
+                            )
+                            if site.get("five_year_supply") in ["❌ No - Not demonstrated", "⚠️ Marginal"]:
+                                report += (
+                                    "Highlighting local housing need can strengthen the VSC case, showing public benefits outweigh the harm to openness. "
+                                )
+                            if site.get("brownfield"):
+                                report += (
+                                    "Emphasize that the scheme reuses previously developed land where possible, reducing Green Belt impact. "
+                                )
+                            report += (
+                                "Include detailed design alternatives and justifications in the submission.\n\n"
+                            )
+            
+                        # ----- CONTAMINATION -----
+                        elif "contamination" in title.lower():
+                            report += (
+                                f"**{title}:** {desc}\n\n"
+                                "Mitigate contamination through site investigations, remediation, monitoring, and verification. "
+                            )
+                            if site.get("brownfield"):
+                                report += (
+                                    "Highlight that remediation enables brownfield regeneration, turning a constraint into a policy-aligned benefit. "
+                                )
+                            report += "Document all steps in the planning submission for assurance and compliance.\n\n"
+            
+                        # ----- ACCESS / HIGHWAYS -----
+                        elif "access" in title.lower():
+                            report += (
+                                f"**{title}:** {desc}\n\n"
+                                "Prepare a robust Transport Assessment identifying mitigation measures for limited access or constrained highway network. "
+                            )
+                            if site.get("primary_use") == "Residential" and site.get("good_access"):
+                                report += (
+                                    "Even with good access, emphasize public transport connectivity and sustainable travel options. "
+                                )
+                            report += "Include technical evidence in the submission to satisfy the highway authority.\n\n"
+            
+                        # ----- GENERIC RISK -----
+                        else:
+                            mitigation = h.get("mitigation", "Develop a clear mitigation plan and document it in the submission.")
+                            report += f"**{title}:** {desc}\n\nMitigation strategy: {mitigation}\n\n"
+            
+                    st.markdown(report)
+            
+            else:
+                st.info("Run an assessment first to generate recommendations.")
 
 if __name__ == "__main__":
     main()
+
 
 
 
