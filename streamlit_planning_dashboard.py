@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 # ----------------------------
 # Config - path to uploaded excel
 # ----------------------------
-EXCEL_PATH = "/mnt/data/data.xlsx"  # uploaded file
+EXCEL_PATH = "data.xlsx"  # uploaded file
 
 # ----------------------------
 # Policy weight function (unchanged)
