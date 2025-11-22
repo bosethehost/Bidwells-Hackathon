@@ -467,29 +467,92 @@ def main():
             
             # Recommendations
             st.subheader("🎯 Recommendations")
-            if balance["score"] >= 75:
-                st.success("**Proceed with confidence** - Strong likelihood of planning success")
-                st.write("""
-                - Initiate pre-application discussions
-                - Prepare detailed design statements
-                - Consider fast-track application route
-                """)
-            elif balance["score"] >= 55:
-                st.warning("**Proceed with caution** - Address key risks before submission")
-                st.write("""
-                - Strengthen mitigation measures
-                - Enhance policy justification
-                - Conduct stakeholder engagement
-                """)
-            else:
-                st.error("**Re-evaluate approach** - Significant planning barriers identified")
-                st.write("""
-                - Review fundamental scheme assumptions
-                - Explore alternative sites or designs
-                - Seek specialist planning advice
-                """)
+
+        if st.session_state.current_assessment:
+        
+            harms = st.session_state.current_assessment["balance"]["rationale"]["top_harms"]
+            benefits = st.session_state.current_assessment["balance"]["rationale"]["top_benefits"]
+            policy_weights = st.session_state.policy_weights
+        
+            report = ""
+        
+            # --- Benefits narrative ---
+            if benefits:
+                report += "The proposed development offers several significant benefits that should be emphasized in the planning submission. "
+                for b in benefits:
+                    if "housing" in b['title'].lower():
+                        report += (
+                            "Given the shortfall in housing delivery in the local area, this scheme can make an important contribution to meeting local housing needs. "
+                            "It is essential to clearly demonstrate how the proposal will deliver both market and affordable housing, with evidence of realistic delivery timelines and mechanisms. "
+                            "Policy-aligned benefits should be highlighted in the planning statement to support any tilted-balance considerations under national policy frameworks. "
+                        )
+                    elif "brownfield" in b['title'].lower():
+                        report += (
+                            "The redevelopment of previously developed land provides clear environmental and sustainability benefits. "
+                            "Brownfield regeneration reduces pressure on greenfield or green belt sites and aligns strongly with national and local planning policies promoting efficient land use. "
+                            "A clear statement of the environmental improvements, remediation works, and wider community benefits should be incorporated into the submission. "
+                        )
+                    elif "heritage" in b['title'].lower():
+                        report += (
+                            "The scheme has the opportunity to enhance the setting of adjacent heritage assets through sensitive design. "
+                            "Design statements should highlight how the development complements the historic environment while providing modern amenities, with careful consideration of materials, massing, and landscaping. "
+                        )
+                    else:
+                        report += f"{b['title']} is a positive aspect of the scheme and should be clearly documented in the planning narrative. "
+        
+            # --- Harms narrative with detailed planning guidance ---
+            if harms:
+                report += "Several risks have been identified that require careful mitigation and justification. "
+                for h in harms:
+                    impact = h.get("impact", 0)
+        
+                    if "flood" in h['title'].lower():
+                        report += (
+                            "Given the significant flood risk identified, the first priority must be to commission a site-specific Flood Risk Assessment (FRA) in line with national planning policy. "
+                            "The FRA should demonstrate not only how the development will remain safe over its lifetime but also that it will not increase flood risk elsewhere. "
+                            "It should incorporate climate change allowances, and early engagement with the Environment Agency and Lead Local Flood Authorities is strongly recommended to ensure that the proposed mitigation strategy is robust and acceptable. "
+                        )
+                    elif "heritage" in h['title'].lower():
+                        report += (
+                            "On the heritage impact front, the proximity to a listed building or conservation area necessitates a detailed heritage statement. "
+                            "This should assess the significance of any impacted asset, the contribution of the site to its setting, and propose design-led mitigation such as careful massing, landscaping, or choice of materials to reduce visual or experiential harm. "
+                            "Including this as part of a broader planning / design and access statement will justify how the scheme responds to policy while preserving historic character. "
+                        )
+                    elif "green belt" in h['title'].lower():
+                        report += (
+                            "As the site lies within or adjacent to the Green Belt, any development will need to demonstrate very special circumstances (VSC) to justify any inappropriate development. "
+                            "The planning submission should include a detailed Green Belt statement outlining the harm to openness and permanence, alongside quantified benefits such as housing delivery, brownfield regeneration, and community enhancements. "
+                            "The VSC argument must show that public benefits clearly outweigh any harm to the Green Belt. "
+                        )
+                    elif "contamination" in h['title'].lower():
+                        report += (
+                            "Where contamination risks are present, commissioning thorough ground investigations and remediation strategies is essential. "
+                            "The planning submission should include details of the remediation approach, monitoring plans, and verification processes to assure the local authority of the site's safety and environmental compliance. "
+                        )
+                    elif "access" in h['title'].lower():
+                        report += (
+                            "Constraints on access or highways require a robust Transport Assessment. "
+                            "The assessment should identify junction improvements, trip generation, and pedestrian/cyclist connectivity. "
+                            "Mitigation measures must be clearly defined and supported by technical evidence to ensure compliance with local and national highway standards. "
+                        )
+                    else:
+                        report += f"{h['title']} is a noted risk that should be assessed and mitigated with appropriate supporting documentation. "
+        
+            # --- Strategic synthesis paragraph ---
+            report += (
+                "Strategically, the development approach should prioritize mitigating the most significant risks while leveraging policy-aligned benefits. "
+                "Phased delivery or alternative design solutions should be considered for high-risk elements, while moderate risks should be monitored and mitigated through targeted interventions. "
+                "Early engagement with the local planning authority and relevant stakeholders is strongly recommended to validate assumptions, address concerns, and refine mitigation strategies. "
+                "All risks and benefits, along with their policy justifications and mitigation measures, should be clearly documented in a comprehensive planning statement to maximize the likelihood of a successful application."
+            )
+        
+            st.markdown(report)
+        
+        else:
+            st.info("Run an assessment first to generate recommendations.")
 
 if __name__ == "__main__":
     main()
+
 
 
