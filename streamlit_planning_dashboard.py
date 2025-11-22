@@ -10,73 +10,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# -------------------------------
-# Config & Paths
-# -------------------------------
-KB_PATH = Path("/mnt/data/kb.json")
-os.makedirs(KB_PATH.parent, exist_ok=True)
-
-# -------------------------------
-# Core Utilities
-# -------------------------------
-
-def enhanced_load_kb() -> Dict[str, Any]:
-    if KB_PATH.exists():
-        try:
-            with open(KB_PATH, "r", encoding="utf-8") as f:
-                kb = json.load(f)
-                if "version" not in kb:
-                    kb = {
-                        "version": "2.0",
-                        "entries": kb.get("entries", []),
-                        "scenarios": {},
-                        "comments": {}
-                    }
-                    save_kb(kb)
-                return kb
-        except Exception:
-            return {"version": "2.0", "entries": [], "scenarios": {}, "comments": {}}
-    else:
-        return {"version": "2.0", "entries": [], "scenarios": {}, "comments": {}}
-
-def save_kb(kb: Dict[str, Any]) -> None:
-    with open(KB_PATH, "w", encoding="utf-8") as f:
-        json.dump(kb, f, indent=2, ensure_ascii=False)
-
-def add_kb_entry(title: str, text: str, tags: List[str]) -> Dict[str, Any]:
-    kb = enhanced_load_kb()
-    entry_id = hashlib.sha1((title + text + str(datetime.utcnow())).encode()).hexdigest()[:10]
-    entry = {
-        "id": entry_id,
-        "title": title,
-        "text": text,
-        "tags": tags,
-        "created_at": datetime.utcnow().isoformat()
-    }
-    kb.setdefault("entries", []).append(entry)
-    save_kb(kb)
-    return entry
-
-@st.cache_data(ttl=3600)
-def search_kb(query: str, top_n=5) -> List[Dict[str, Any]]:
-    kb = enhanced_load_kb()
-    hits = []
-    q = query.lower()
-    for e in kb.get("entries", []):
-        score = 0
-        if q in e.get("title", "").lower():
-            score += 3
-        if q in e.get("text", "").lower():
-            score += 2
-        for t in e.get("tags", []):
-            if q in t.lower():
-                score += 1
-        if score > 0:
-            hits.append((score, e))
-    hits.sort(key=lambda x: -x[0])
-    return [h[1] for h in hits[:top_n]]
-
-# -------------------------------
+# 
 # Automatic Policy Weight Calculation
 # -------------------------------
 
@@ -568,3 +502,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
