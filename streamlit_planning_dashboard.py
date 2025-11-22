@@ -405,17 +405,6 @@ def main():
                         "benefits": benefits,
                         "balance": balance
                     }
-                    
-                    # Save to KB
-                    entry_text = json.dumps({
-                        "site_meta": st.session_state.site_meta,
-                        "harms": harms,
-                        "benefits": benefits,
-                        "policy_weights": st.session_state.policy_weights
-                    }, default=str)
-                    add_kb_entry(f"Assessment - {st.session_state.site_meta['site_choice']}", 
-                               entry_text[:4000], 
-                               tags=["assessment", st.session_state.site_meta['site_choice']])
         
         # FIX: Check if assessment exists before accessing it
         if st.session_state.current_assessment is not None:
@@ -502,4 +491,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
